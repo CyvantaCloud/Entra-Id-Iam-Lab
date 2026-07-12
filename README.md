@@ -49,6 +49,8 @@ Microsoft Entra ID P2, Azure Portal, Azure Log Analytics, Conditional Access Pol
 **Solution:** Built an 11-user directory populated with realistic metadata (job titles, departments, usage location, employee type) covering Finance, IT, Sales, Engineering, Executive, Contractor, and AI Workload archetypes.
 
 **Evidence:** User directory screenshots showing full metadata population across all account types.
+![Users List](screenshots/lab1/lab1-01-users-list.png)
+![User Full Metadata](screenshots/lab1/lab1-02-user-full-metadata.png)
 
 ### Phase 2: Security Group Architecture
 
@@ -57,6 +59,9 @@ Microsoft Entra ID P2, Azure Portal, Azure Log Analytics, Conditional Access Pol
 **Solution:** Created 4 assigned security groups (GRP-Finance-HighSecurity, GRP-Remote-Workers, GRP-IT-Admins, GRP-Contractors-External) to logically segment users by function and risk profile, enabling targeted policy application.
 
 **Evidence:** Group membership screenshots showing correct segmentation.
+![Alex Helpdesk Role](screenshots/lab1/lab1-03-alex-helpdesk-role-assigned.png)
+![Security Groups List](screenshots/lab1/lab1-04-security-groups-list.png)
+![Finance Group Members](screenshots/lab1/lab1-05-grp-finance-high-security-members.png)
 
 ### Phase 3: Dynamic Group Automation
 
@@ -65,6 +70,8 @@ Microsoft Entra ID P2, Azure Portal, Azure Log Analytics, Conditional Access Pol
 **Solution:** Deployed a dynamic membership group (GRP-All-Internal-Employees) using Entra ID P2 automation rules, enabling self-populating group membership based on user attributes with zero manual intervention.
 
 **Evidence:** Screenshot of dynamic group auto-populating 12 members immediately following rule deployment.
+![Dynamic KQL Rule](screenshots/lab1/lab1-06-dynamic-kql-rule.png)
+![Dynamic Group Members](screenshots/lab1/lab1-07-dynamic-group-members.png)
 
 ### Phase 4: Zero Trust Conditional Access & MFA Enforcement
 
@@ -73,6 +80,8 @@ Microsoft Entra ID P2, Azure Portal, Azure Log Analytics, Conditional Access Pol
 **Solution:** Deployed POL-Enforce-MFA-HighSecurity, a Conditional Access Policy targeting GRP-Finance-HighSecurity, requiring Multi-Factor Authentication for sign-in. Included a deliberate exclusion for the administrative break-glass account to prevent lockout scenarios.
 
 **Evidence:** Live MFA challenge screens triggered during test logins for David Cho and Linda Chen, confirming policy enforcement in the lab tenant.
+![MFA Policy Config](screenshots/lab1/lab1-08-pol-enforce-mfa-config.png)
+![MFA Challenge Screen](screenshots/lab1/lab1-09-mfa-challenge-screen.png)
 
 **Key Technical Finding:** Testing showed that Microsoft-managed tenant security protections and admin portal authentication requirements can still trigger MFA behavior outside the scope of a custom Conditional Access exclusion. This shaped the break-glass design toward phishing-resistant, non-human-controlled FIDO2 hardware authentication as the more robust long-term approach.
 
@@ -83,6 +92,9 @@ Microsoft Entra ID P2, Azure Portal, Azure Log Analytics, Conditional Access Pol
 **Solution:** Created a Tier 1 Helpdesk identity and assigned the built-in Helpdesk Administrator role, scoped specifically to perform password resets without visibility into Conditional Access or security configuration.
 
 **Evidence:** Verified the helpdesk account successfully reset a standard user's password while receiving an explicit "Access Denied" response when attempting to view or modify Conditional Access Policies, confirming least-privilege boundary enforcement on both sides.
+![Helpdesk Role Assigned](screenshots/lab1/lab1-10-t1-helpdesk-role-assigned.png)
+![Password Reset Success](screenshots/lab1/lab1-11-password-reset-success.png)
+![Access Denied CA](screenshots/lab1/lab1-12-access-denied-conditional-access.png)
 
 ### Phase 6: Joiner-Mover-Leaver (JML) Lifecycle
 
@@ -91,12 +103,17 @@ Microsoft Entra ID P2, Azure Portal, Azure Log Analytics, Conditional Access Pol
 **Engineering Execution:** Verified automatic enrollment into the dynamic baseline group (GRP-All-Internal-Employees) at account creation. Manually provisioned department-specific access via a newly created GRP-Engineering-Standard assigned group, demonstrating deliberate, auditable access decisions for departmental resources.
 
 **Evidence:** Confirmed Marcus's clean-slate group membership prior to department assignment, and successful provisioning into the Engineering group.
+![Marcus Clean Slate](screenshots/lab1/lab1-13-marcus-clean-slate-groups.png)
+![Engineering Group Created](screenshots/lab1/lab1-14-grp-engineering-standard-created.png)
+
 
 **Mover — Business Scenario:** Marcus Webb receives an internal promotion to IT Security Analyst, requiring an access transition that eliminates lingering Engineering permissions (privilege creep) while granting appropriate IT Security access.
 
 **Engineering Execution:** Updated core identity attributes (job title, department) to reflect the new role. Manually removed Marcus from GRP-Engineering-Standard and added him to GRP-IT-Admins, ensuring no residual access followed him into his new position.
 
 **Evidence:** Verified final group membership reflected only GRP-All-Internal-Employees and GRP-IT-Admins, with Engineering access fully revoked.
+![Mover Properties Updated](screenshots/lab1/lab1-15-marcus-mover-properties-updated.png)
+![Mover Groups Updated](screenshots/lab1/lab1-16-marcus-mover-groups-updated.png)
 
 **Leaver — Business Scenario:** Marcus Webb is terminated from the organization. To mitigate insider threat risk, IT must immediately neutralize the identity.
 
@@ -105,6 +122,8 @@ Microsoft Entra ID P2, Azure Portal, Azure Log Analytics, Conditional Access Pol
 **Defensive Verification:** Simulated a post-termination login attempt via incognito browser. The perimeter successfully blocked access, returning error code 50057 ("the user account is disabled").
 
 **Forensic Evidence:** Confirmed the administrative transition via Entra ID Audit Logs, capturing the AccountEnabled property change from true to false as an immutable record.
+![Account Disabled](screenshots/lab1/lab1-17-marcus-account-disabled.png)
+![Locked Account Error](screenshots/lab1/lab1-18-marcus-locked-account-error.png)
 
 ### Phase 7: Forensic Auditing
 
@@ -113,6 +132,7 @@ Microsoft Entra ID P2, Azure Portal, Azure Log Analytics, Conditional Access Pol
 **Solution:** Reviewed Entra ID Audit Logs to trace the complete history of Marcus Webb's lifecycle, from account creation through role transition to termination, confirming each administrative action was logged immutably with timestamp and actor attribution.
 
 **Evidence:** Audit log entries corresponding to each lifecycle event.
+![Audit Log Lifecycle](screenshots/lab1/lab1-19-marcus-audit-log-lifecycle.png)
 
 ### Phase 8: Emergency Access (Break-Glass Account) & SIEM Telemetry
 
@@ -135,6 +155,11 @@ SigninLogs
 ```
 
 **Evidence:** Verified a baseline of zero events prior to testing, confirming the tripwire's clean state. Triggered a controlled test login and confirmed the query surfaced real authentication telemetry, including AADSTS result codes 0 (Success), 50055 (Mandatory Password Reset), and 50140 (Keep Me Signed In Prompt), each decoded into human-readable status via KQL's `case()` function.
+![Break-Glass Role Assigned](screenshots/lab1/lab1-20-breakglass-global-admin-assigned.png)
+![Log Analytics Deployed](screenshots/lab1/lab1-21-log-analytics-workspace-deployed.png)
+![Diagnostic Settings](screenshots/lab1/lab1-22-diagnostic-settings-streaming.png)
+![KQL Zero Results](screenshots/lab1/lab1-23-kql-query-zero-results-baseline.png)
+![KQL Results After Login](screenshots/lab1/lab1-24-kql-query-results-after-login.png)
 
 **Key Technical Finding:** While standard security baselines recommend fully excluding break-glass accounts from Conditional Access policies, testing in this lab tenant showed that Microsoft's root-level tenant security defaults can still override these exclusions when accessing administrative endpoints (Azure Portal, Entra Admin Center). Forcing a traditional, human-bound MFA method, such as a personal mobile device, onto an emergency account introduces a single-point-of-failure liability if that employee separates from the organization or loses device access. The more robust approach is binding the identity to a non-human, phishing-resistant FIDO2 hardware security key, with the physical token and its PIN stored in a dual-custody fireproof safe rather than tied to any individual's personal device.
 
@@ -156,6 +181,11 @@ SigninLogs
 - **Auditability:** Required a mandatory business justification field on every activation request, generating an immutable audit trail for every temporary privilege escalation
 
 **Verification Result:** Logged in as the target user in an isolated incognito session and triggered the PIM activation flow. Successfully cleared all three security gates (MFA, justification, time-bound duration) and confirmed a live, decaying access window with an explicit expiration timestamp, replacing the prior model of unmonitored, always-on administrative access.
+![PIM Role Settings](screenshots/lab2/lab2-01-pim-role-settings.png)
+![Alex Eligible Assignment](screenshots/lab2/lab2-02-alex-eligible-assignment.png)
+![Eligible Roles Before](screenshots/lab2/lab2-03-eligible-roles-before-activation.png)
+![Activation Screen](screenshots/lab2/lab2-04-activation-screen-justification.png)
+![Countdown Timer](screenshots/lab2/lab2-05-active-assignment-countdown.png)
 
 *Note: Alex Rivera serves as a recurring test identity across this lab — the standing administrator account converted to Just-In-Time access in Lab 2, and the test employee used to validate access package provisioning and SSO federation in Lab 3. This reflects deliberate reuse of a single persona across lifecycle stages rather than separate, unrelated accounts.*
 
@@ -168,6 +198,11 @@ SigninLogs
 **Solution:** Built a self-service governance loop using Microsoft Entra Entitlement Management. Created a Resource Catalog (Marketing Department Resources) containing internal security groups, then bundled them into a single requestable Access Package (Marketing Onboarding Pack) with manager approval and an automatic expiration policy to enforce a strict access shelf-life.
 
 **Evidence:** Verified the access package successfully provisioned group membership to a test user upon assignment.
+![Catalog With Groups](screenshots/lab3/lab3a-01-catalog-with-groups.png)
+![Access Package Config](screenshots/lab3/lab3a-02-access-package-config.png)
+![MyAccess Request Screen](screenshots/lab3/lab3a-03-myaccess-request-screen.png)
+![Approval Screen](screenshots/lab3/lab3a-04-approval-screen.png)
+![Group Membership Delivered](screenshots/lab3/lab3a-05-group-membership-delivered.png)
 
 **Key Technical Finding:** During initial testing, the Approvals dashboard failed to surface a pending request, traced to a likely policy state conflict introduced by reassigning the approver mid-configuration combined with a concurrent tenant subscription transition. Bypassed the stuck queue by directly creating the assignment via the Assignments tab to confirm the underlying access package correctly provisioned access, with the full request-approval workflow flagged for re-verification on a subsequent lab rebuild.
 
@@ -184,6 +219,14 @@ SigninLogs
 **Technical Troubleshooting & Resolution:** Initial end-to-end testing failed with an HTTP 400 (GENERAL_NONSUCCESS) error. Diagnosed the failure using Okta's System Log, tracing a sequential failure chain (Unknown Profile Attribute → user creation failure → Just-In-Time provisioning failure) back to a root cause: Microsoft Entra ID transmits directory attributes as full XML schema URIs (e.g., `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname`), which Okta's default profile parser does not natively recognize. Resolved this by building a custom attribute schema in Okta's Profile Editor, explicitly mapping the incoming Entra XML claim URIs to custom-defined profile attributes, then binding those attributes to Okta's standard user profile fields (firstName, lastName, email) and the core username router (subjectNameId → login).
 
 **Verification Result:** Re-ran the end-to-end test — a test user was assigned the access package, received the governed application resource, and successfully authenticated through the federated SSO bridge directly from the Microsoft MyApps portal. Entra ID signed and passed the SAML assertion, Okta correctly parsed the now-mapped claims, and Just-In-Time provisioning dynamically created a matching local Okta account on first login with no separate password required, immediately followed by Okta's standard MFA enrollment prompt for the newly provisioned identity.
+![Entra SAML Placeholders](screenshots/lab3/lab3b-01-entra-saml-placeholder-values.png)
+![Okta IdP Config](screenshots/lab3/lab3b-02-okta-idp-config.png)
+![Entra SAML Real Values](screenshots/lab3/lab3b-03-entra-saml-real-values.png)
+![Okta Profile Editor](screenshots/lab3/lab3b-04-okta-profile-editor-attributes.png)
+![Okta Mapping Screen](screenshots/lab3/lab3b-05-okta-mapping-screen.png)
+![MyApps Okta Tile](screenshots/lab3/lab3b-06-myapps-okta-tile.png)
+![Okta Login Success](screenshots/lab3/lab3b-07-okta-login-success.png)
+![Okta System Log](screenshots/lab3/lab3b-08-okta-system-log.png)
 
 ## 7. Lab 4: Automated Access Certification & Risk-Based Identity Protection
 
@@ -194,6 +237,9 @@ SigninLogs
 **Solution:** Deployed an automated access review campaign (REV-Finance-Quarterly-Attestation) targeting GRP-Finance-HighSecurity. Configured the reviewer as the Lab Admin account, set a 14-day review window with a one-time recurrence, and enabled the "no sign-in within 30 days" decision helper to surface stale accounts automatically. Critically, enabled auto-apply results with a "Remove access" fallback for non-responsive reviewers — enforcing a deny-by-default stance without requiring manual intervention.
 
 **Verification Result:** Logged in as the auditor, approved one Finance user (Linda Chen — "Required for core quarterly ledger operations") and denied another (David Cho — "Project concluded; baseline access no longer required"). Manually stopped the review early to trigger the auto-remediation engine. Confirmed the denied user was automatically removed from GRP-Finance-HighSecurity by the Azure AD Identity Governance service actor — not by an admin — as evidenced in the group's audit log.
+![Access Review Config](screenshots/lab4/lab4-01-access-review-config.png)
+![Reviewer Decision Screen](screenshots/lab4/lab4-02-reviewer-decision-screen.png)
+![Audit Log Governance Actor](screenshots/lab4/lab4-03-audit-log-governance-actor.png)
 
 ### Phase 2: Risk-Based Conditional Access (Machine Learning Defense Perimeter)
 
@@ -206,6 +252,9 @@ SigninLogs
 **Safety Architecture:** Explicitly excluded the Emergency Break-Glass account from the policy scope. If an attacker triggers a high-risk event that locks down the environment, the emergency recovery path remains unblocked regardless of sign-in risk score.
 
 **Evidence:** Screenshots captured showing the policy in Report-only state, then promoted to On, plus the Sign-in risk detections dashboard confirming the monitoring feed is active. Note: the sandbox environment does not generate real-world risk signals such as impossible travel or leaked credential detections, so the detections dashboard showed a clean baseline state — which is the expected outcome in a lab tenant.
+![CA Risk Policy Report Only](screenshots/lab4/lab4-04-ca-risk-policy-report-only.png)
+![CA Risk Policy On](screenshots/lab4/lab4-05-ca-risk-policy-on.png)
+![Sign In Risk Detections](screenshots/lab4/lab4-06-sign-in-risk-detections.png)
 
 ## 8. Lab 5: Microsoft Entra Agent ID — AI Workload Identity Governance
 
@@ -232,6 +281,13 @@ Built a Conditional Access policy targeting the specific agent identity rather t
 **Why risk-based rather than blanket block:** Configuring Agent risk conditions rather than unconditionally blocking access demonstrates understanding of adaptive security architecture — In an enforced deployment, the agent could operate normally until Microsoft's Identity Protection ML engine detects anomalous behavior patterns, at which point access would be automatically blocked. This mirrors the same Zero Trust-aligned, signal-driven approach used for human identities in Lab 4.
 
 **Evidence:** Screenshots captured showing the Agent blueprints dashboard, Linked agent identities confirming the provisioned agent identity, the Conditional Access assignments panel showing "Users or agents → Agents" with agent-specific targeting options (All agent identities, All agent users, Select agent identities, Select agent users), Agent risk (Preview) condition configured with High and Medium selected, and the final Conditional Access policies dashboard showing all three user-created policies with their respective states (CA-AI-Agent-RiskContainment: Report-only, CA-Finance-RiskBased-DynamicMFA: On, POL-Enforce-MFA-HighSecurity: On).
+![Blueprint Overview](screenshots/lab5/lab5-01-blueprint-overview.png)
+![Linked Agent Identities](screenshots/lab5/lab5-02-linked-agent-identities.png)
+![Agent Audit Logs](screenshots/lab5/lab5-03-agent-audit-logs.png)
+![CA Agent Assignments Panel](screenshots/lab5/lab5-04-ca-agent-assignments-panel.png)
+![Agent Risk Condition](screenshots/lab5/lab5-05-agent-risk-condition.png)
+![All Three Policies Dashboard](screenshots/lab5/lab5-06-all-three-policies-dashboard.png)
+![Risky Agents Dashboard](screenshots/lab5/lab5-07-risky-agents-dashboard.png)
 
 **Licensing note:** The lab tenant exposed Agent ID and agent-risk Conditional Access capabilities during testing. Microsoft's Agent 365 and Entra Agent ID licensing model is evolving, and future production deployments may require Microsoft Agent 365 licensing depending on the agent governance capabilities used — documented here as a real-world constraint awareness finding consistent with production deployment planning.
 
