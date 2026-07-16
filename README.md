@@ -18,15 +18,21 @@ This lab portfolio was built to demonstrate the ability to architect, implement,
 
 **Entitlement Management over manual provisioning:** Manual group membership management does not scale and does not audit. Entitlement Management packages resources into governed, requestable bundles with approval workflows and automatic expiration, replacing a process that relies on humans remembering to clean up with one that enforces cleanup automatically.
 
-**Agent ID for AI workloads:** As organizations deploy autonomous AI agents, those agents need identity governance the same way human users do. Microsoft Entra Agent ID (generally available 2026) extends Zero Trust principles to non-human workloads — allowing organizations to define what an agent can access, who is accountable for it, and what happens when its behavior becomes anomalous. Governing AI agents is not a future concern; it is a current one for any organization running Copilot, custom agents, or automated workflows.
+**Agent ID for AI workloads:** As organizations deploy autonomous AI agents, those agents need identity governance the same way human users do. Microsoft Entra Agent ID extends Zero Trust principles to non-human workloads — allowing organizations to define what an agent can access, who is accountable for it, and what happens when its behavior becomes anomalous. Governing AI agents is not a future concern; it is a current one for any organization running Copilot, custom agents, or automated workflows.
 
 ---
 
 ## 1. Executive Summary
 
-This project details the design, implementation, and management of an enterprise-grade Identity and Access Management (IAM) sandbox built within Microsoft Entra ID. Built using Zero Trust-aligned identity controls, this lab simulates the entire employee Joiner-Mover-Leaver (JML) lifecycle.
+This project details the design, implementation, and management of an enterprise-aligned Identity and Access Management (IAM) sandbox built within Microsoft Entra ID. Built using Zero Trust-aligned identity controls, this lab simulates the entire employee Joiner-Mover-Leaver (JML) lifecycle.
 
 The core objective of this project was to engineer automated access controls, enforce high-security authentication perimeters, proactively remediate privilege creep during role transitions, and implement forensic auditing and disaster recovery fail-safes. The architecture demonstrates practical enforcement of the Principle of Least Privilege (PoLP) and robust identity governance.
+
+## Reader Guide
+
+This portfolio is organized as a progressive IAM build. Lab 1 establishes the identity foundation — users, groups, lifecycle management, and monitoring. Lab 2 secures privileged access using Just-in-Time activation. Lab 3A governs access requests through self-service entitlement management. Lab 3B extends identity federation across platforms using SAML 2.0. Lab 4 adds continuous access certification and risk-based authentication controls. Lab 5 explores non-human workload identity governance using Microsoft Entra Agent ID.
+
+Each lab builds on the infrastructure of the previous one — same tenant, same users, growing in complexity.
 
 ## 2. Environment Architecture
 
@@ -305,7 +311,7 @@ SigninLogs
 
 **Business Problem:** As organizations deploy autonomous AI agents alongside human workers, the same identity governance principles that protect human accounts must extend to non-human workloads. An AI agent with ungoverned access represents a new attack surface — if compromised or behaving anomalously, it can exfiltrate data or escalate privileges without any human authentication event to trigger traditional security controls.
 
-**Context:** Microsoft Entra Agent ID became generally available in 2026, making this one of the most current IAM capabilities available. Building hands-on lab evidence of AI workload identity governance demonstrates awareness of the emerging frontier of enterprise identity security — a differentiator that most entry-level candidates cannot speak to.
+**Context:** Microsoft Entra Agent ID was available in this lab tenant during testing, allowing exploration of emerging workload and agent identity governance concepts. Building hands-on evidence of AI workload identity governance demonstrates awareness of the emerging frontier of enterprise identity security — a differentiator that most entry-level candidates cannot speak to.
 
 **Solution:** Provisioned a governed AI workload identity using Microsoft's Agent ID framework, applied a risk-based Conditional Access policy scoped specifically to the agent identity, and deployed monitoring infrastructure to track agent sign-in behavior separately from human user activity.
 
@@ -335,7 +341,7 @@ Built a Conditional Access policy targeting the specific agent identity rather t
 ![All Three Policies Dashboard](screenshots/lab5/lab5-06-all-three-policies-dashboard.png)
 ![Risky Agents Dashboard](screenshots/lab5/lab5-07-risky-agents-dashboard.png)
 
-**Licensing note:** The lab tenant exposed Agent ID and agent-risk Conditional Access capabilities during testing. Microsoft's Agent 365 and Entra Agent ID licensing model is evolving, and future production deployments may require Microsoft Agent 365 licensing depending on the agent governance capabilities used — documented here as a real-world constraint awareness finding consistent with production deployment planning.
+**Licensing note:** The lab tenant exposed Agent ID and agent-risk Conditional Access capabilities during testing. Licensing and enforcement behavior for agent identity governance may vary as Microsoft continues evolving these capabilities — documented here as an architectural and licensing consideration consistent with production deployment planning.
 
 **Troubleshooting & Lessons Learned:**
 
@@ -349,7 +355,7 @@ Built a Conditional Access policy targeting the specific agent identity rather t
 - Implemented and validated the complete Joiner-Mover-Leaver identity lifecycle, including proactive privilege creep remediation during role transitions
 - Converted standing/permanent administrative access into Just-In-Time privileged access via Microsoft Entra PIM, enforcing time-bound activation windows, mandatory MFA step-up, and auditable business justification on every elevation request
 - Deployed an automated access certification campaign using Entra ID Access Reviews, configuring deny-by-default auto-remediation that removed a user from a high-security group via the Azure AD Identity Governance service actor rather than manual admin action
-- Built and deployed a governed AI workload identity using Microsoft Entra Agent ID (generally available 2026), provisioning an agent identity blueprint with designated human ownership and sponsorship, and applying a risk-based Conditional Access policy targeting the specific agent identity using Agent risk (Preview) ML conditions — extending Zero Trust principles to non-human AI workloads
+- Built and deployed a governed AI workload identity using Microsoft Entra Agent ID, provisioning an agent identity blueprint with designated human ownership and sponsorship, and applying a risk-based Conditional Access policy targeting the specific agent identity using Agent risk (Preview) ML conditions — extending Zero Trust principles to non-human AI workloads
 - Built and debugged a live cross-platform SAML 2.0 federation bridge between Microsoft Entra ID (IdP) and Okta (SP), diagnosing a real XML schema attribute mismatch via system log analysis and resolving it through custom directory schema mapping
 - Unified external SaaS access under the same governance lifecycle as internal resources, binding a federated application directly into an Entitlement Management access package rather than provisioning SSO as a standalone exception
 - Designed and enforced Zero Trust Conditional Access policies with risk-based MFA targeting
